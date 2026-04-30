@@ -10,6 +10,7 @@ public:
 
     void render() override;
 
+    std::function<void()> getCallback() const;
     void setCallback(std::function<void()> callback);
 
 protected:

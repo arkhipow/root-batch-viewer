@@ -14,6 +14,10 @@ void Button::render() {
     }
 }
 
+std::function<void()> Button::getCallback() const {
+    return callback;
+}
+
 void Button::setCallback(std::function<void()> callback) {
     this->callback = callback;
 }
