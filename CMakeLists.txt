@@ -74,6 +74,12 @@ target_link_libraries(implot PUBLIC
 set(ROOT_BATCH_VIEWER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(root_batch_viewer
+    ${ROOT_BATCH_VIEWER_DIR}/src/rect.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/widget.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/container.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/text.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/button.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/plot.cpp
     ${ROOT_BATCH_VIEWER_DIR}/src/application.cpp
     ${ROOT_BATCH_VIEWER_DIR}/src/main.cpp
 )
