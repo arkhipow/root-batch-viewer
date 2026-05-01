@@ -11,7 +11,7 @@ void Browser::render() {
             if (ImGui::TreeNode(files[i].getName().c_str())) {
 
                 for (int j = 0; j < files[i].getData().size(); ++j) {
-                    if (ImGui::Selectable(files[i].getData()[j].name.c_str())) {
+                    if (ImGui::Selectable(files[i].getData()[j].name.c_str(), (currFile == i) && (currData == j))) {
                         currFile = i;
                         currData = j;
                     }
