@@ -3,6 +3,9 @@
 #include "text.hpp"
 #include "button.hpp"
 #include "plot.hpp"
+#include "browser.hpp"
+
+#include <iostream>
 
 int main() {
     Application app(Rect::percent(0, 0, 90, 80), "Root Batch Viewer");
@@ -93,6 +96,29 @@ int main() {
 
                 sync();
             }
+        }
+    );
+
+    auto c1 = app.add<Container>(Rect::percent(1, 1, 98, 98), "Root");
+    c1->setTab(0);
+
+    auto c2 = c1->add<Container>(Rect::percent(0, 0, 100, 91), "Browser");
+    c2->setColor(1, 1, 1, 1);
+
+    auto fs = c2->add<Browser>(Rect::percent(0, 0, 100, 100), "Files");
+
+    auto b6 = c1->add<Button>(Rect::percent(0, 96, 100, 4), "Open File");
+    b6->setCallback(
+        [&fs] {
+            fs->add(File::open());
+        }
+    );
+
+    auto b7 = c1->add<Button>(Rect::percent(0, 92, 100, 4), "Link");
+    b7->setCallback(
+        [&fs, &p, &curr] {
+            Data& data = fs->getData();
+            p[curr]->setData(data.x, data.y);
         }
     );
 
