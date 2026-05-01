@@ -1,5 +1,7 @@
 #include "application.hpp"
 
+#include <nfd.h>
+
 #include <stdexcept>
 
 Application::Application(const Rect& rect, const std::string& title)
@@ -124,9 +126,13 @@ void Application::init() {
     ImGui_ImplOpenGL3_Init("#version 330");
 
     ImPlot::CreateContext();
+
+    NFD_Init();
 }
 
 void Application::destroy() {
+    NFD_Quit();
+
     ImPlot::DestroyContext();
 
     ImGui_ImplOpenGL3_Shutdown();
