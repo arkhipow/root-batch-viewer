@@ -75,7 +75,12 @@ target_link_libraries(implot PUBLIC
     imgui
 )
 
-# RootBatchViewer
+# Native File Dialog Extended
+set(NATIVE_FILE_DIALOG_EXTENDED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/nativefiledialog-extended)
+
+add_subdirectory(${NATIVE_FILE_DIALOG_EXTENDED_DIR})
+
+# Root Batch Viewer
 set(ROOT_BATCH_VIEWER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(root_batch_viewer
@@ -85,6 +90,8 @@ add_executable(root_batch_viewer
     ${ROOT_BATCH_VIEWER_DIR}/src/text.cpp
     ${ROOT_BATCH_VIEWER_DIR}/src/button.cpp
     ${ROOT_BATCH_VIEWER_DIR}/src/plot.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/browser.cpp
+    ${ROOT_BATCH_VIEWER_DIR}/src/parser.cpp
     ${ROOT_BATCH_VIEWER_DIR}/src/application.cpp
     ${ROOT_BATCH_VIEWER_DIR}/src/main.cpp
 )
@@ -100,4 +107,5 @@ target_link_libraries(root_batch_viewer PRIVATE
     glfw
     imgui
     implot
+    nfd
 )
