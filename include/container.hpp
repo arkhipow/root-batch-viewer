@@ -14,9 +14,13 @@ public:
     template <typename T, typename... Args>
     std::shared_ptr<T> add(Args&&... args);
 
+    void setColor(float r, float g, float b, float a);
+
 private:
     template <typename T>
     using Items = std::vector<std::shared_ptr<T>>;
+
+    ImVec4 color;
 
     Items<Widget> widgets;
 };
