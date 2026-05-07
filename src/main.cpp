@@ -5,8 +5,6 @@
 #include "plot.hpp"
 #include "browser.hpp"
 
-#include <iostream>
-
 int main() {
     Application app(Rect::percent(0, 0, 90, 80), "Root Batch Viewer");
 
@@ -27,14 +25,38 @@ int main() {
     int curr = 0;
     p[curr]->setVisible(true);
 
+    std::vector<std::shared_ptr<Histogram>> h;
+    for (int i = 0; i < 20; ++i) {
+        h.push_back(app.add<Histogram>(Rect::percent(1, 6, 98, 88), "Histogram " + std::to_string(i + 1)));
+        h[i]->setTab(2);
+        h[i]->setVisible(false);
+        h[i]->setData(x, y);
+    }
+    int currH = 0;
+
     auto prop = app.add<Container>(Rect::percent(1, 1, 98, 4), "Properties");
     prop->setTab(2);
 
+    auto ps = prop->add<ToggleButton>(Rect::percent(0, 0, 10, 100), "Plots");
+    ps->setToggle(true);
+
+    auto hs = prop->add<ToggleButton>(Rect::percent(10, 0, 10, 100), "Histograms");
+
     auto b1 = prop->add<ToggleButton>(Rect::percent(70, 0, 10, 100), "Log X");
-    b1->setCallback([&p, &curr] { p[curr]->setLogX(!p[curr]->getLogX()); });
+    b1->setCallback(
+        [&p, &curr] {
+            p[curr]->setLogX(!p[curr]->getLogX());
+            p[curr]->reset();
+        }
+    );
 
     auto b2 = prop->add<ToggleButton>(Rect::percent(80, 0, 10, 100), "Log Y");
-    b2->setCallback([&p, &curr] { p[curr]->setLogY(!p[curr]->getLogY()); });
+    b2->setCallback(
+        [&p, &curr] {
+            p[curr]->setLogY(!p[curr]->getLogY());
+            p[curr]->reset();
+        }
+    );
 
     auto sync = [&p, &curr, &b1, &b2] {
         b1->setToggle(p[curr]->getLogX());
@@ -73,28 +95,54 @@ int main() {
 
     auto b4 = nav->add<Button>(Rect::percent(0, 0, 45, 100), "Prev");
     b4->setCallback(
-        [&p, &curr, &t2, &sync] {
-            if (curr > 0) {
-                p[curr]->setVisible(false);
-                p[--curr]->setVisible(true);
+        [&] {
+            if (ps->getToggle()) {
+                if (curr > 0) {
+                    p[curr]->setVisible(false);
+                    p[--curr]->setVisible(true);
 
-                t2->setVal(curr + 1);
+                    t2->setVal(curr + 1);
 
-                sync();
+                    sync();
+                }
+            }
+
+            else if (hs->getToggle()) {
+                if (currH > 0) {
+                    h[currH]->setVisible(false);
+                    h[--currH]->setVisible(true);
+
+                    t2->setVal(currH + 1);
+
+                    sync();
+                }
             }
         }
     );
 
     auto b5 = nav->add<Button>(Rect::percent(55, 0, 45, 100), "Next");
     b5->setCallback(
-        [&p, &curr, &t2, &sync] {
-            if (curr < p.size() - 1) {
-                p[curr]->setVisible(false);
-                p[++curr]->setVisible(true);
+        [&] {
+            if (ps->getToggle()) {
+                if (curr < p.size() - 1) {
+                    p[curr]->setVisible(false);
+                    p[++curr]->setVisible(true);
 
-                t2->setVal(curr + 1);
+                    t2->setVal(curr + 1);
 
-                sync();
+                    sync();
+                }
+            }
+
+            else if (hs->getToggle()) {
+                if (currH < h.size() - 1) {
+                    h[currH]->setVisible(false);
+                    h[++currH]->setVisible(true);
+
+                    t2->setVal(currH + 1);
+
+                    sync();
+                }
             }
         }
     );
@@ -116,9 +164,62 @@ int main() {
 
     auto b7 = c1->add<Button>(Rect::percent(0, 92, 100, 4), "Link");
     b7->setCallback(
-        [&fs, &p, &curr] {
+        [&] {
             Data& data = fs->getData();
-            p[curr]->setData(data.x, data.y);
+
+            if (ps->getToggle()) {
+                p[curr]->setData(data.x, data.y);
+                p[curr]->reset();
+            }
+
+            else if (hs->getToggle()) {
+                h[currH]->setData(data.x, data.y);
+                h[currH]->setBins(data.bins);
+                h[currH]->reset();
+            }
+        }
+    );
+
+    std::vector<float> hx;
+    float mean = 10.0f;
+    float sigma = 3.0f;
+
+    for (int i = 0; i < 100; ++i) {
+        float exponent = -std::pow(i - mean, 2) / (2 * std::pow(sigma, 2));
+        float weight = std::exp(exponent);
+
+        int count = static_cast<int>(weight * 100);
+
+        for (int j = 0; j < count; ++j) {
+            hx.push_back((float)i);
+        }
+    }
+
+    ps->setCallback(
+        [&] {
+            hs->setToggle(!hs->getToggle());
+
+            b1->setVisible(true);
+            b2->setVisible(true);
+
+            p[curr]->setVisible(true);
+            h[currH]->setVisible(false);
+
+            t2->setVal(curr + 1);
+        }
+    );
+
+    hs->setCallback(
+        [&] {
+            ps->setToggle(!ps->getToggle());
+
+            b1->setVisible(false);
+            b2->setVisible(false);
+
+            p[curr]->setVisible(false);
+            h[currH]->setVisible(true);
+
+            t2->setVal(currH + 1);
         }
     );
 
