@@ -1,17 +1,19 @@
 #include "plot.hpp"
+#include <algorithm>
+
+Graph::Graph(const Rect& rect, const std::string& label)
+    : Widget(rect, label) {}
+
+void Graph::reset() {
+    ImPlot::SetNextAxesToFit();
+}
 
 Plot::Plot(const Rect& rect, const std::string& label)
-    : Widget(rect, label), logX(false), logY(false), fit(false) {}
+    : Graph(rect, label), logX(false), logY(false) {}
 
 void Plot::render() {
-    if (x.empty() || y.empty()) {
-        return;
-    }
-
     Rect rect = getRectPixels();
     ImGui::SetCursorPos(ImVec2(rect.x, rect.y));
-
-    reset();
 
     if (ImPlot::BeginPlot(label.c_str(), ImVec2(rect.width, rect.height))) {
         if (logX) {
@@ -42,17 +44,36 @@ bool Plot::getLogY() const noexcept {
 
 void Plot::setLogX(bool logX) noexcept {
     this->logX = logX;
-    fit = true;
 }
 
 void Plot::setLogY(bool logY) noexcept {
     this->logY = logY;
-    fit = true;
 }
 
-void Plot::reset() {
-    if (fit) {
-        ImPlot::SetNextAxesToFit();
-        fit = false;
+Histogram::Histogram(const Rect& rect, const std::string& label)
+    : Graph(rect, label), bins(-2) {}
+
+void Histogram::render() {
+    Rect rect = getRectPixels();
+    ImGui::SetCursorPos(ImVec2(rect.x, rect.y));
+
+    if (ImPlot::BeginPlot(label.c_str(), ImVec2(rect.width, rect.height))) {
+        ImPlotSpec spec;
+        spec.FillAlpha = 0.5;
+
+        ImPlotRange range(*(std::min_element)(x.begin(), x.end()), *(std::max_element)(x.begin(), x.end()));
+
+        ImPlot::PlotHistogram(("##" + label).c_str(), x.data(), x.size(), bins, 1, range, spec);
+
+        ImPlot::EndPlot();
     }
+}
+
+void Histogram::setData(const std::vector<float>& x, const std::vector<float>& y) {
+    this->x = x;
+    this->y = y;
+}
+
+void Histogram::setBins(int bins) noexcept {
+    this->bins = bins;
 }

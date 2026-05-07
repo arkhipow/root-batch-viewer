@@ -4,7 +4,14 @@
 
 #include <vector>
 
-class Plot : public Widget {
+class Graph : public Widget {
+public:
+    Graph(const Rect& rect, const std::string& label);
+
+    static void reset();
+};
+
+class Plot : public Graph {
 public:
     Plot(const Rect& rect, const std::string& label);
 
@@ -19,13 +26,25 @@ public:
     void setLogY(bool logY) noexcept;
 
 private:
-    void reset();
-
     std::vector<float> x;
     std::vector<float> y;
 
     bool logX;
     bool logY;
+};
 
-    bool fit;
+class Histogram : public Graph {
+public:
+    Histogram(const Rect& rect, const std::string& label);
+
+    void render() override;
+
+    void setData(const std::vector<float>& x, const std::vector<float>& y);
+
+    void setBins(int bins) noexcept;
+
+private:
+    std::vector<float> x;
+    std::vector<float> y;
+    int bins;
 };
