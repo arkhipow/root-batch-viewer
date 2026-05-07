@@ -167,12 +167,12 @@ int main() {
         [&] {
             Data& data = fs->getData();
 
-            if (ps->getToggle()) {
+            if (data.cname == "TGraph") {
                 p[curr]->setData(data.x, data.y);
                 p[curr]->reset();
             }
 
-            else if (hs->getToggle()) {
+            else if (data.cname == "TH1F") {
                 h[currH]->setData(data.x, data.y);
                 h[currH]->setBins(data.bins);
                 h[currH]->reset();
