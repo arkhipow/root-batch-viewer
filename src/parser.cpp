@@ -4,6 +4,7 @@
 
 #include <TFile.h>
 #include <TGraph.h>
+#include <TH1.h>
 #include <TKey.h>
 #include <TList.h>
 
@@ -62,6 +63,7 @@ void Parser::parse(File& file) {
             if (graph) {
                 Data data;
 
+                data.cname = className;
                 data.name = graph->GetName();
 
                 double* xPoints = graph->GetX();
@@ -70,6 +72,25 @@ void Parser::parse(File& file) {
                 for (int i = 0; i < graph->GetN(); ++i) {
                     data.x.push_back(xPoints[i]);
                     data.y.push_back(yPoints[i]);
+                }
+
+                file.getData().push_back(data);
+            }
+        }
+
+        else if (className == "TH1F") {
+            TH1F* histogram = dynamic_cast<TH1F*>(key->ReadObj());
+
+            if (histogram) {
+                Data data;
+
+                data.cname = className;
+                data.name = histogram->GetName();
+
+                for (int i = 1; i <= histogram->GetNbinsX(); ++i) {
+                    data.x.push_back(histogram->GetBinContent(i));
+                    data.y.push_back(histogram->GetBinCenter(i));
+                    data.bins = histogram->GetNbinsX();
                 }
 
                 file.getData().push_back(data);

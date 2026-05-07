@@ -4,9 +4,13 @@
 #include <vector>
 
 struct Data {
+    std::string cname;
+
     std::string name;
     std::vector<float> x;
     std::vector<float> y;
+
+    int bins;
 };
 
 class File {
