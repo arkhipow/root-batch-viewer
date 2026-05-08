@@ -7,7 +7,7 @@ void Browser::render() {
     Rect rect = getRectPixels();
     elementRect = elementRect.toPixels(rect.width, rect.height);
 
-    ImGui::SetWindowFontScale(getScale() * 0.8);
+    ImGui::SetWindowFontScale(getScale() * 0.7);
 
     if (ImGui::TreeNode(label.c_str())) {
         for (int i = 0; i < files.size(); ++i) {
