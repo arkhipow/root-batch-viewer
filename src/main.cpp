@@ -25,12 +25,28 @@ int main() {
     int curr = 0;
     p[curr]->setVisible(true);
 
+    std::vector<float> hx;
+    float mean = 10.0f;
+    float sigma = 3.0f;
+
+    for (int i = 0; i < 100; ++i) {
+        float exponent = -std::pow(i - mean, 2) / (2 * std::pow(sigma, 2));
+        float weight = std::exp(exponent);
+
+        int count = static_cast<int>(weight * 100);
+
+        for (int j = 0; j < count; ++j) {
+            hx.push_back((float)i);
+        }
+    }
+
     std::vector<std::shared_ptr<Histogram>> h;
     for (int i = 0; i < 20; ++i) {
         h.push_back(app.add<Histogram>(Rect::percent(1, 6, 98, 88), "Histogram " + std::to_string(i + 1)));
         h[i]->setTab(2);
         h[i]->setVisible(false);
-        h[i]->setData(x, y);
+        h[i]->setData(hx, x);
+        h[i]->setBins(-3);
     }
     int currH = 0;
 
@@ -154,6 +170,7 @@ int main() {
     c2->setColor(1, 1, 1, 1);
 
     auto fs = c2->add<Browser>(Rect::percent(0, 0, 100, 100), "Files");
+    // fs->setElementRect(Rect::percent(0, 0, 100, 4));
 
     auto b6 = c1->add<Button>(Rect::percent(0, 96, 100, 4), "Open File");
     b6->setCallback(
@@ -179,21 +196,6 @@ int main() {
             }
         }
     );
-
-    std::vector<float> hx;
-    float mean = 10.0f;
-    float sigma = 3.0f;
-
-    for (int i = 0; i < 100; ++i) {
-        float exponent = -std::pow(i - mean, 2) / (2 * std::pow(sigma, 2));
-        float weight = std::exp(exponent);
-
-        int count = static_cast<int>(weight * 100);
-
-        for (int j = 0; j < count; ++j) {
-            hx.push_back((float)i);
-        }
-    }
 
     ps->setCallback(
         [&] {
