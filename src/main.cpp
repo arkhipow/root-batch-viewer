@@ -5,12 +5,14 @@
 #include "plot.hpp"
 #include "browser.hpp"
 
+#include <iostream>
+
 int main() {
     Application app(Rect::percent(0, 0, 90, 80), "Root Batch Viewer");
 
     std::vector<float> x;
     std::vector<float> y;
-    for (float i = 0; i <= 100000; i += 1) {
+    for (float i = 0; i <= 100; i += 1) {
         x.push_back(i);
         y.push_back(i);
     }
@@ -87,20 +89,27 @@ int main() {
     auto t2 = nav->add<Input>(Rect::percent(45, 0, 10, 100), "Page");
     t2->setVal(1);
     t2->setCallback(
-        [&p, &curr, &t2, &sync] {
+        [&] {
             int newPage = t2->getVal();
 
             if (newPage >= 1 && newPage <= static_cast<int>(p.size())) {
                 int newIndex = newPage - 1;
 
-                if (newIndex != curr) {
+                if (ps->getToggle()) {
                     p[curr]->setVisible(false);
 
                     curr = newIndex;
                     p[curr]->setVisible(true);
-
-                    sync();
                 }
+
+                else if (hs->getToggle()) {
+                    h[currH]->setVisible(false);
+
+                    currH = newIndex;
+                    h[currH]->setVisible(true);
+                }
+
+                sync();
             }
 
             else {
@@ -108,6 +117,37 @@ int main() {
             }
         }
     );
+
+    auto crt = prop->add<Button>(Rect::percent(20, 0, 10, 100), "Create");
+    crt->setCallback(
+        [&] {
+            if (ps->getToggle()) {
+                p.push_back(app.add<Plot>(Rect::percent(1, 6, 98, 88), "Plot " + std::to_string(p.size() + 1)));
+                p[p.size() - 1]->setTab(2);
+                p[p.size() - 1]->setVisible(false);
+
+                p[curr]->setVisible(false);
+                curr = p.size() - 1;
+                p[curr]->setVisible(true);
+
+                t2->setVal(curr + 1);
+            }
+
+            else if (hs->getToggle()) {
+                h.push_back(app.add<Histogram>(Rect::percent(1, 6, 98, 88), "Histogram " + std::to_string(h.size() + 1)));
+                h[h.size() - 1]->setTab(2);
+                h[h.size() - 1]->setVisible(false);
+
+                h[currH]->setVisible(false);
+                currH = h.size() - 1;
+                h[currH]->setVisible(true);
+
+                t2->setVal(currH + 1);
+            }
+        }
+    );
+
+    auto rmv = prop->add<Button>(Rect::percent(30, 0, 10, 100), "Remove");
 
     auto b4 = nav->add<Button>(Rect::percent(0, 0, 45, 100), "Prev");
     b4->setCallback(
@@ -199,7 +239,8 @@ int main() {
 
     ps->setCallback(
         [&] {
-            hs->setToggle(!hs->getToggle());
+            ps->setToggle(true);
+            hs->setToggle(false);
 
             b1->setVisible(true);
             b2->setVisible(true);
@@ -213,7 +254,8 @@ int main() {
 
     hs->setCallback(
         [&] {
-            ps->setToggle(!ps->getToggle());
+            hs->setToggle(true);
+            ps->setToggle(false);
 
             b1->setVisible(false);
             b2->setVisible(false);
