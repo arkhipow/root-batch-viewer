@@ -15,6 +15,8 @@ public:
 
     void setCallback(std::function<void()> callback);
 
+    void setElementRect(Rect rect);
+
     Data& getData();
 
 private:
@@ -23,4 +25,6 @@ private:
     int currData;
 
     std::function<void()> callback;
+
+    Rect elementRect;
 };
