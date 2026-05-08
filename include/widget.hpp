@@ -23,6 +23,7 @@ public:
 
 protected:
     Rect getRectPixels() const;
+    float getScale() const;
 
     Rect rect;
     std::string label;

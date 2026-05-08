@@ -40,3 +40,12 @@ Rect Widget::getRectPixels() const {
 
     return rectPixels;
 }
+
+float Widget::getScale() const {
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+    float scale;
+    glfwGetMonitorContentScale(monitor, &scale, nullptr);
+
+    return scale;
+}
