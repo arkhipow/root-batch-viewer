@@ -24,7 +24,11 @@ void Plot::render() {
             ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Log10);
         }
 
-        ImPlot::PlotLine(("##" + label).c_str(), x.data(), y.data(), x.size());
+        ImPlotSpec spec;
+        spec.LineWeight = 2;
+        spec.Marker = ImPlotMarker_Circle;
+
+        ImPlot::PlotLine(("##" + label).c_str(), x.data(), y.data(), x.size(), spec);
         ImPlot::EndPlot();
     }
 }
@@ -61,9 +65,9 @@ void Histogram::render() {
         ImPlotSpec spec;
         spec.FillAlpha = 0.5;
 
-        ImPlotRange range(*(std::min_element)(x.begin(), x.end()), *(std::max_element)(x.begin(), x.end()));
+        // ImPlotRange range(*(std::min_element)(x.begin(), x.end()), *(std::max_element)(x.begin(), x.end()));
 
-        ImPlot::PlotHistogram(("##" + label).c_str(), x.data(), x.size(), bins, 1, range, spec);
+        ImPlot::PlotHistogram(("##" + label).c_str(), x.data(), x.size(), bins, 1, ImPlotRange(), spec);
 
         ImPlot::EndPlot();
     }
