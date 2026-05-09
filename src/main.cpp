@@ -5,6 +5,8 @@
 #include "plot.hpp"
 #include "browser.hpp"
 
+#include <iostream>
+
 int main() {
     Application app(Rect::percent(0, 0, 90, 80), "Root Batch Viewer");
 
@@ -233,13 +235,20 @@ int main() {
     auto b6 = c1->add<Button>(Rect::percent(0, 96, 100, 4), "Open File");
     b6->setCallback(
         [&fs] {
-            fs->add(File::open());
+            File file = File::open();
+            if (!file.getName().empty()) {
+                fs->add(file);
+            }
         }
     );
 
     auto b7 = c1->add<Button>(Rect::percent(0, 92, 100, 4), "Link");
     b7->setCallback(
         [&] {
+            if (!fs->getSelect()) {
+                return;
+            }
+
             Data& data = fs->getData();
 
             if (data.cname == "TGraph") {
@@ -286,6 +295,63 @@ int main() {
             t2->setVal(currH + 1);
 
             sync();
+        }
+    );
+
+    rmv->setCallback(
+        [&] {
+            if (ps->getToggle()) {
+                if (p.size() <= 1) return;
+
+                p[curr]->setVisible(false);
+
+                p.erase(p.begin() + curr);
+
+                if (curr >= static_cast<int>(p.size())) {
+                    curr = static_cast<int>(p.size()) - 1;
+                }
+
+                p[curr]->setVisible(true);
+
+                t2->setVal(curr + 1);
+
+                sync();
+            }
+
+            else if (hs->getToggle()) {
+                if (h.size() <= 1) return;
+
+                h[currH]->setVisible(false);
+
+                h.erase(h.begin() + currH);
+
+                if (currH >= static_cast<int>(h.size())) {
+                    currH = static_cast<int>(h.size()) - 1;
+                }
+
+                h[currH]->setVisible(true);
+
+                t2->setVal(currH + 1);
+
+                sync();
+            }
+        }
+    );
+
+    b3->setCallback(
+        [&] {
+            std::string path = File::save();
+            if (path.empty()) return;
+
+            std::cout << path << std::endl;
+
+            if (ps->getToggle()) {
+                p[curr]->save(path);
+            }
+
+            else if (hs->getToggle()) {
+                h[currH]->save(path);
+            }
         }
     );
 
