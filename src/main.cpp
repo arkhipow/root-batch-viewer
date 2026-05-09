@@ -5,8 +5,6 @@
 #include "plot.hpp"
 #include "browser.hpp"
 
-#include <iostream>
-
 int main() {
     Application app(Rect::percent(0, 0, 90, 80), "Root Batch Viewer");
 
@@ -60,7 +58,7 @@ int main() {
 
     auto hs = prop->add<ToggleButton>(Rect::percent(10, 0, 10, 100), "Histograms");
 
-    auto b1 = prop->add<ToggleButton>(Rect::percent(70, 0, 10, 100), "Log X");
+    auto b1 = prop->add<ToggleButton>(Rect::percent(60, 0, 10, 100), "Log X");
     b1->setCallback(
         [&p, &curr] {
             p[curr]->setLogX(!p[curr]->getLogX());
@@ -68,7 +66,7 @@ int main() {
         }
     );
 
-    auto b2 = prop->add<ToggleButton>(Rect::percent(80, 0, 10, 100), "Log Y");
+    auto b2 = prop->add<ToggleButton>(Rect::percent(70, 0, 10, 100), "Log Y");
     b2->setCallback(
         [&p, &curr] {
             p[curr]->setLogY(!p[curr]->getLogY());
@@ -76,9 +74,29 @@ int main() {
         }
     );
 
-    auto sync = [&p, &curr, &b1, &b2] {
-        b1->setToggle(p[curr]->getLogX());
-        b2->setToggle(p[curr]->getLogY());
+    auto m = prop->add<ToggleButton>(Rect::percent(80, 0, 10, 100), "Measure");
+    m->setCallback(
+        [&] {
+            if (ps->getToggle()) {
+                p[curr]->setMeasure(!p[curr]->getMeasure());
+            }
+
+            else if (hs->getToggle()) {
+                h[currH]->setMeasure(!h[currH]->getMeasure());
+            }
+        }
+    );
+
+    auto sync = [&] {
+        if (ps->getToggle()) {
+            b1->setToggle(p[curr]->getLogX());
+            b2->setToggle(p[curr]->getLogY());
+            m->setToggle(p[curr]->getMeasure());
+        }
+
+        else if (hs->getToggle()) {
+            m->setToggle(h[currH]->getMeasure());
+        }
     };
 
     auto b3 = prop->add<Button>(Rect::percent(90, 0, 10, 100), "Save");
@@ -249,6 +267,8 @@ int main() {
             h[currH]->setVisible(false);
 
             t2->setVal(curr + 1);
+
+            sync();
         }
     );
 
@@ -264,6 +284,8 @@ int main() {
             h[currH]->setVisible(true);
 
             t2->setVal(currH + 1);
+
+            sync();
         }
     );
 
