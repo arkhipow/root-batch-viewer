@@ -31,6 +31,8 @@ public:
     void setLogX(bool logX) noexcept;
     void setLogY(bool logY) noexcept;
 
+    void save(const std::string& path);
+
 private:
     int findClosestPoint(float mPosX, float mPosY);
 
@@ -50,6 +52,8 @@ public:
     void setData(const std::vector<float>& x, const std::vector<float>& y);
 
     void setBins(int bins) noexcept;
+
+    void save(const std::string& path);
 
 private:
     int findClosestBin(float mPosX, float mPosY);

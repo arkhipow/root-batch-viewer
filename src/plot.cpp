@@ -1,4 +1,10 @@
 #include "plot.hpp"
+
+#include <TCanvas.h>
+#include <TGraph.h>
+#include <TH1F.h>
+#include <TROOT.h>
+
 #include <algorithm>
 
 Graph::Graph(const Rect& rect, const std::string& label)
@@ -178,4 +184,64 @@ int Histogram::findClosestBin(float mPosX, float mPosY) {
     }
 
     return i;
+}
+
+void Plot::save(const std::string& path) {
+    gROOT->SetBatch(kTRUE);
+
+    TCanvas* canvas = new TCanvas("canvas_plot", "CERN ROOT Canvas", 1200, 900);
+
+    TGraph* graph = new TGraph(static_cast<int>(x.size()), x.data(), y.data());
+
+    std::string titleStr = label;
+    graph->SetTitle(titleStr.c_str());
+
+    graph->SetLineColor(kBlue + 2);
+    graph->SetLineWidth(2);
+
+    graph->Draw("AL");
+
+    canvas->SaveAs(path.c_str());
+
+    delete graph;
+    delete canvas;
+
+    gROOT->SetBatch(kFALSE);
+}
+
+void Histogram::save(const std::string& path) {
+    gROOT->SetBatch(kTRUE);
+
+    TCanvas* canvas = new TCanvas("canvas_hist", "CERN ROOT Canvas", 1200, 900);
+
+    canvas->SetLogy(0);
+
+    float binWidth = 1.0f;
+    if (y.size() > 1) {
+        binWidth = y[1] - y[0];
+    }
+
+    float lowEdge = y.front() - (binWidth / 2.0f);
+    float highEdge = y.back() + (binWidth / 2.0f);
+    int nBins = static_cast<int>(y.size());
+
+    std::string titleStr = label;
+    TH1F* hist = new TH1F("h_root", titleStr.c_str(), nBins, lowEdge, highEdge);
+
+    for (int i = 0; i < nBins; ++i) {
+        hist->SetBinContent(i + 1, x[i]);
+    }
+
+    hist->SetFillColor(kBlue - 7);
+    hist->SetLineColor(kBlack);
+    hist->SetLineWidth(1);
+
+    hist->Draw("HIST");
+
+    canvas->SaveAs(path.c_str());
+
+    delete hist;
+    delete canvas;
+
+    gROOT->SetBatch(kFALSE);
 }
