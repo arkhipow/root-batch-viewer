@@ -9,6 +9,12 @@ public:
     Graph(const Rect& rect, const std::string& label);
 
     static void reset();
+
+    bool getMeasure() const noexcept;
+    void setMeasure(bool measure) noexcept;
+
+protected:
+    bool measure;
 };
 
 class Plot : public Graph {
@@ -26,6 +32,8 @@ public:
     void setLogY(bool logY) noexcept;
 
 private:
+    int findClosestPoint(float mPosX, float mPosY);
+
     std::vector<float> x;
     std::vector<float> y;
 
@@ -44,6 +52,8 @@ public:
     void setBins(int bins) noexcept;
 
 private:
+    int findClosestBin(float mPosX, float mPosY);
+
     std::vector<float> x;
     std::vector<float> y;
     int bins;
