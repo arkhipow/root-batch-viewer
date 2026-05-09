@@ -51,7 +51,7 @@ void Plot::render() {
 
                     spec.MarkerSize = 8;
                     spec.MarkerFillColor = ImVec4(1, 0, 0, 0.5);
-                    spec.LineColor = ImVec4(1, 0, 0, 1);
+                    spec.LineColor = ImVec4(1, 0, 0, 0.5);
                     ImPlot::PlotLine(("##" + label + " Current").c_str(), &x[i], &y[i], 1, spec);
 
                     spec.MarkerSize = 4;
@@ -107,6 +107,10 @@ int Plot::findClosestPoint(float mPosX, float mPosY) {
         }
     }
 
+    if (mPosY < y[i] - 2 || mPosY > y[i] + 2) {
+        i = -1;
+    }
+
     return i;
 }
 
@@ -159,18 +163,17 @@ void Histogram::setBins(int bins) noexcept {
 
 int Histogram::findClosestBin(float mPosX, float mPosY) {
     int i = -1;
-    float dist = FLT_MAX;
 
-    for (float p : y) {
-        float d = std::abs(mPosX - p);
+    float binWidth = 1.0f;
+    if (y.size() > 1) {
+        binWidth = y[1] - y[0];
+    }
 
-        if (d < dist) {
-            dist = d;
-            i++;
-        }
-
-        else {
-            break;
+    for (int j = 0; j < y.size(); ++j) {
+        if (mPosX >= y[j] - binWidth / 2 && mPosX <= y[j] + binWidth / 2) {
+            if (mPosY >= 0 && mPosY <= x[j]) {
+                i = j;
+            }
         }
     }
 
