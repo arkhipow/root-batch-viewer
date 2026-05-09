@@ -14,10 +14,10 @@ public:
     void add(File& file);
 
     void setCallback(std::function<void()> callback);
-
     void setElementRect(Rect rect);
 
     Data& getData();
+    bool getSelect();
 
 private:
     std::vector<File> files;

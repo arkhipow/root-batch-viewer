@@ -11,7 +11,7 @@ void Browser::render() {
 
     if (ImGui::TreeNode(label.c_str())) {
         for (int i = 0; i < files.size(); ++i) {
-            if (ImGui::TreeNode(files[i].getName().c_str())) {
+            if (ImGui::TreeNode((files[i].getName() + "##" + files[i].getPath()).c_str())) {
                 File& file = files[i];
 
                 for (int j = 0; j < file.getData().size(); ++j) {
@@ -35,6 +35,20 @@ void Browser::render() {
 }
 
 void Browser::add(File& file) {
+    for (size_t i = 0; i < files.size(); ++i) {
+        if (files[i].getPath() == file.getPath()) {
+            Parser::parse(file);
+
+            files[i] = file;
+
+            if (currFile == static_cast<int>(i)) {
+                currData = -1;
+            }
+
+            return;
+        }
+    }
+
     Parser::parse(file);
     files.push_back(file);
 }
@@ -49,4 +63,10 @@ void Browser::setElementRect(Rect rect) {
 
 Data& Browser::getData() {
     return files[currFile].getData()[currData];
+}
+
+bool Browser::getSelect() {
+    if (currFile < 0 || currFile >= static_cast<int>(files.size())) return false;
+    if (currData < 0 || currData >= static_cast<int>(files[currFile].getData().size())) return false;
+    return true;
 }
