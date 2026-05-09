@@ -32,6 +32,10 @@ File File::open() {
 
     nfdresult_t res = NFD_OpenDialogU8_With(&path, &flags);
 
+    if (res != NFD_OKAY || path == nullptr) {
+        return File("");
+    }
+
     return File(path);
 }
 
@@ -100,4 +104,28 @@ void Parser::parse(File& file) {
 
     f->Close();
     delete f;
+}
+
+std::string File::save() {
+    nfdu8char_t* path = nullptr;
+
+    nfdsavedialogu8args_t flags = {};
+    nfdu8filteritem_t filters[] = { { "PNG Image", "png" } };
+    flags.filterList = filters;
+    flags.filterCount = sizeof(filters) / sizeof(nfdu8filteritem_t);
+
+    nfdresult_t dialog = NFD_SaveDialogU8_With(&path, &flags);
+
+    if (dialog != NFD_OKAY || path == nullptr) {
+        return "";
+    }
+
+    std::string res(path);
+
+    if (res.size() < 4 || res.substr(res.size() - 4) != ".png") {
+        res += ".png";
+    }
+
+    NFD_FreePathU8(path);
+    return res;
 }

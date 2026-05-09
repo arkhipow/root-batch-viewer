@@ -23,6 +23,8 @@ public:
     const std::string& getPath() const;
     std::vector<Data>& getData();
 
+    static std::string save();
+
 private:
     std::string name;
     std::string path;
