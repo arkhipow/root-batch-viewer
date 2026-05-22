@@ -89,15 +89,32 @@ int main() {
         }
     );
 
+    auto tl = app.add<InputText>(Rect::percent(1, 1, 10, 4), "Title");
+    tl->setText(p[curr]->getLable());
+
+    auto ax = app.add<InputText>(Rect::percent(1, 6, 10, 4), "Axis X");
+    ax->setTab(3);
+    ax->setText(p[curr]->getAxisX());
+
+    auto ay = app.add<InputText>(Rect::percent(1, 11, 10, 4), "Axis Y");
+    ay->setTab(3);
+    ay->setText(p[curr]->getAxisY());
+
     auto sync = [&] {
         if (ps->getToggle()) {
             b1->setToggle(p[curr]->getLogX());
             b2->setToggle(p[curr]->getLogY());
             m->setToggle(p[curr]->getMeasure());
+            tl->setText(p[curr]->getLable());
+            ax->setText(p[curr]->getAxisX());
+            ay->setText(p[curr]->getAxisY());
         }
 
         else if (hs->getToggle()) {
             m->setToggle(h[currH]->getMeasure());
+            tl->setText(h[currH]->getLable());
+            ax->setText(h[currH]->getAxisX());
+            ay->setText(h[currH]->getAxisY());
         }
     };
 
@@ -253,12 +270,18 @@ int main() {
 
             if (data.cname == "TGraph") {
                 p[curr]->setData(data.x, data.y);
+                p[curr]->setLable(data.name);
+                p[curr]->setAxisX(data.axisX);
+                p[curr]->setAxisY(data.axisY);
                 p[curr]->reset();
             }
 
             else if (data.cname == "TH1F") {
                 h[currH]->setData(data.x, data.y);
                 h[currH]->setBins(data.bins);
+                h[currH]->setLable(data.name);
+                h[currH]->setAxisX(data.axisX);
+                h[currH]->setAxisY(data.axisY);
                 h[currH]->reset();
             }
         }
@@ -351,6 +374,44 @@ int main() {
 
             else if (hs->getToggle()) {
                 h[currH]->save(path);
+            }
+        }
+    );
+
+    // View
+    tl->setTab(3);
+    tl->setCallback(
+        [&] {
+            if (ps->getToggle()) {
+                p[curr]->setLable(tl->getText());
+            }
+
+            else if (hs->getToggle()) {
+                h[currH]->setLable(tl->getText());
+            }
+        }
+    );
+
+    ax->setCallback(
+        [&] {
+            if (ps->getToggle()) {
+                p[curr]->setAxisX(ax->getText());
+            }
+
+            else if (hs->getToggle()) {
+                h[currH]->setAxisX(ax->getText());
+            }
+        }
+    );
+
+    ay->setCallback(
+        [&] {
+            if (ps->getToggle()) {
+                p[curr]->setAxisY(ay->getText());
+            }
+
+            else if (hs->getToggle()) {
+                h[currH]->setAxisY(ay->getText());
             }
         }
     );
