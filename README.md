@@ -1,3 +1,4 @@
+![UML](assets/uml/uml.png)
 ![Sample 1](assets/screenshots/sample1.png)
 ![Sample 2](assets/screenshots/sample2.png)
 ![Sample 3](assets/screenshots/sample3.png)
