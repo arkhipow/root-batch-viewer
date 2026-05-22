@@ -60,3 +60,40 @@ void Input::setVal(int val) noexcept {
 void Input::setCallback(std::function<void()> callback) {
     this->callback = callback;
 }
+
+InputText::InputText(const Rect& rect, const std::string& label)
+    : Widget(rect, label)
+{
+    text.resize(64, '\0');
+}
+
+void InputText::render() {
+    auto rect = getRectPixels();
+    ImGui::SetCursorPos(ImVec2(rect.x, rect.y));
+    ImGui::SetNextItemWidth(rect.width);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(ImGui::GetStyle().FramePadding.x, (rect.height - ImGui::GetFontSize()) / 2.0f));
+
+    if (ImGui::InputText(("##" + label).c_str(), text.data(), text.size())) {
+        if (callback) {
+            callback();
+        }
+    }
+
+    ImGui::PopStyleVar();
+}
+
+std::string InputText::getText() const {
+    return std::string(text.c_str());
+}
+
+void InputText::setText(const std::string& text) {
+    std::fill(this->text.begin(), this->text.end(), '\0');
+
+    size_t charsToCopy = std::min(text.size(), this->text.size() - 1);
+    std::copy(text.begin(), text.begin() + charsToCopy, this->text.begin());
+}
+
+void InputText::setCallback(std::function<void()> callback) {
+    this->callback = callback;
+}

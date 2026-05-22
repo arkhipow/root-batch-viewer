@@ -33,3 +33,20 @@ private:
 
     std::function<void()> callback;
 };
+
+class InputText : public Widget {
+public:
+    InputText(const Rect& rect, const std::string& label);
+
+    void render() override;
+
+    std::string getText() const;
+    void setText(const std::string& text);
+
+    void setCallback(std::function<void()> callback);
+
+private:
+    std::string text;
+
+    std::function<void()> callback;
+};
