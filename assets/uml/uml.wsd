@@ -1,0 +1,226 @@
+@startuml RootBatchViewer
+
+struct Rect {
+    + type: Type = Type::Pixels
+    + x: float = 0
+    + y: float = 0
+    + width: float = 0
+    + height: float = 0
+    + {static} pixels(x: float, y: float, width: float, height: float): Rect <<noexcept>>
+    + {static} percent(x: float, y: float, width: float, height: float): Rect <<noexcept>>
+    + toPixels(width: float, height: float): Rect <<const>> <<noexcept>>
+    + toPercent(width: float, height: float): Rect <<const>> <<noexcept>>
+}
+
+enum Type <<enum class>> {
+    Pixels
+    Percent
+}
+
+struct Data {
+    + cname: std::string
+    + name: std::string
+    + x: std::vector<float>
+    + y: std::vector<float>
+    + axisX: std::string
+    + axisY: std::string
+    + bins: int
+}
+
+enum menuTabs <<enum class>> {
+    File
+    Process
+    Plots
+    View
+}
+
+abstract class Widget {
+    + Widget(rect: const Rect&, label: const std::string&)
+    + ~Widget() <<virtual>> = default
+    + {abstract} render(): void
+    + getTab(): int <<const>> <<noexcept>>
+    + setTab(tab: int): void <<noexcept>>
+    + getVisible(): bool <<const>> <<noexcept>>
+    + setVisible(visible: bool): void <<noexcept>>
+    + getLable(): std::string <<const>>
+    + setLable(label: const std::string&): void
+    # getRectPixels(): Rect <<const>>
+    # getScale(): float <<const>>
+    # rect: Rect
+    # label: std::string
+    # tab: int
+    # visible: bool
+}
+
+class Text {
+    + Text(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + getText(): std::string <<const>>
+    + setText(text: const std::string&): void
+    # text: std::string
+}
+
+class Input {
+    + Input(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + getVal(): int <<const>> <<noexcept>>
+    + setVal(val: int): void <<noexcept>>
+    + setCallback(callback: std::function<void()>): void
+    - val: int
+    - callback: std::function<void()>
+}
+
+class InputText {
+    + InputText(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + getText(): std::string <<const>>
+    + setText(text: const std::string&): void
+    + setCallback(callback: std::function<void()>): void
+    - text: std::string
+    - callback: std::function<void()>
+}
+
+class Browser {
+    + Browser(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + add(file: File&): void
+    + setCallback(callback: std::function<void()>): void
+    + setElementRect(rect: Rect): void
+    + getData(): Data&
+    + getSelect(): bool
+    - files: std::vector<File>
+    - currFile: int
+    - currData: int
+    - callback: std::function<void()>
+    - elementRect: Rect
+}
+
+class Button {
+    + Button(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + getCallback(): std::function<void()> <<const>>
+    + setCallback(callback: std::function<void()>): void
+    # callback: std::function<void()>
+}
+
+class ToggleButton {
+    + ToggleButton(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + getToggle(): bool <<const>> <<noexcept>>
+    + setToggle(toggle: bool): void <<noexcept>>
+    - toggle: bool
+}
+
+class Container {
+    + Container(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + add<T, Args...>(args: Args&&...): std::shared_ptr<T>
+    + setColor(r: float, g: float, b: float, a: float): void
+    - color: ImVec4
+    - widgets: Items<Widget>
+}
+
+class Graph {
+    + Graph(rect: const Rect&, label: const std::string&)
+    + {static} reset(): void
+    + getMeasure(): bool <<const>> <<noexcept>>
+    + setMeasure(measure: bool): void <<noexcept>>
+    + getAxisX(): std::string <<const>>
+    + setAxisX(x: const std::string&): void
+    + getAxisY(): std::string <<const>>
+    + setAxisY(y: const std::string&): void
+    # measure: bool
+    # axisX: std::string
+    # axisY: std::string
+}
+
+class Plot {
+    + Plot(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + setData(x: const std::vector<float>&, y: const std::vector<float>&): void
+    + getLogX(): bool <<const>> <<noexcept>>
+    + getLogY(): bool <<const>> <<noexcept>>
+    + setLogX(logX: bool): void <<noexcept>>
+    + setLogY(logY: bool): void <<noexcept>>
+    + save(path: const std::string&): void
+    - findClosestPoint(mPosX: float, mPosY: float): int
+    - x: std::vector<float>
+    - y: std::vector<float>
+    - logX: bool
+    - logY: bool
+}
+
+class Histogram {
+    + Histogram(rect: const Rect&, label: const std::string&)
+    + render(): void <<override>>
+    + setData(x: const std::vector<float>&, y: const std::vector<float>&): void
+    + setBins(bins: int): void <<noexcept>>
+    + save(path: const std::string&): void
+    - findClosestBin(mPosX: float, mPosY: float): int
+    - x: std::vector<float>
+    - y: std::vector<float>
+    - bins: int
+}
+
+class File {
+    + File(path: const std::string&)
+    + {static} open(): File
+    + getName(): const std::string& <<const>>
+    + getPath(): const std::string& <<const>>
+    + getData(): std::vector<Data>&
+    + {static} save(): std::string
+    - name: std::string
+    - path: std::string
+    - data: std::vector<Data>
+}
+
+class Parser <<final>> {
+    + {static} parse(file: File&): void
+}
+
+class Application <<final>> {
+    + Application(rect: const Rect&, title: const std::string&)
+    + ~Application()
+    + run(): void
+    + add<T, Args...>(args: Args&&...): std::shared_ptr<T>
+    - init(): void
+    - destroy(): void
+    - menu(): void
+    - render(): void
+    - rect: Rect
+    - title: std::string
+    - widgets: Items<Widget>
+    - tab: menuTabs
+    - handle: GLFWwindow*
+}
+
+Rect +-- Type
+Application +-- menuTabs
+
+Widget <|-- Browser
+Widget <|-- Button
+Widget <|-- Container
+Widget <|-- Graph
+Widget <|-- Text
+Widget <|-- Input
+Widget <|-- InputText
+
+Button <|-- ToggleButton
+Graph <|-- Plot
+Graph <|-- Histogram
+
+Application "1" o-- "0..*" Widget : Управляет >
+Container "1" o-- "0..*" Widget : Содержит >
+
+Widget "1" *-- "1" Rect : Композиция размера >
+Application --> Rect : Имеет размер >
+
+File "1" *-- "0..*" Data : Содержит >
+Browser "1" *-- "0..*" File : Хранит список >
+Browser ..> Data : Использует >
+Parser ..> File : Обрабатывает >
+
+Plot ..> Data : Отображает >
+Histogram ..> Data : Отображает >
+
+@enduml
