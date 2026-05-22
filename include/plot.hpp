@@ -13,8 +13,17 @@ public:
     bool getMeasure() const noexcept;
     void setMeasure(bool measure) noexcept;
 
+    std::string getAxisX() const;
+    void setAxisX(const std::string& x);
+
+    std::string getAxisY() const;
+    void setAxisY(const std::string& y);
+
 protected:
     bool measure;
+
+    std::string axisX;
+    std::string axisY;
 };
 
 class Plot : public Graph {

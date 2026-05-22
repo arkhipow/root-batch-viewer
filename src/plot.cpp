@@ -8,7 +8,7 @@
 #include <algorithm>
 
 Graph::Graph(const Rect& rect, const std::string& label)
-    : Widget(rect, label), measure(false) {}
+    : Widget(rect, label), measure(false), axisX("X"), axisY("Y") {}
 
 void Graph::reset() {
     ImPlot::SetNextAxesToFit();
@@ -20,6 +20,22 @@ bool Graph::getMeasure() const noexcept {
 
 void Graph::setMeasure(bool measure) noexcept {
     this->measure = measure;
+}
+
+std::string Graph::getAxisX() const {
+    return axisX;
+}
+
+void Graph::setAxisX(const std::string& x) {
+    this->axisX = x;
+}
+
+std::string Graph::getAxisY() const {
+    return axisY;
+}
+
+void Graph::setAxisY(const std::string& y) {
+    this->axisY = y;
 }
 
 Plot::Plot(const Rect& rect, const std::string& label)
@@ -41,6 +57,9 @@ void Plot::render() {
         ImPlotSpec spec;
         spec.LineWeight = 2;
         spec.Marker = ImPlotMarker_Circle;
+
+        ImPlot::SetupAxis(ImAxis_X1, axisX.c_str());
+        ImPlot::SetupAxis(ImAxis_Y1, axisY.c_str());
 
         ImPlot::PlotLine(("##" + label).c_str(), x.data(), y.data(), x.size(), spec);
 
@@ -136,6 +155,9 @@ void Histogram::render() {
             binWidth = y[1] - y[0];
         }
 
+        ImPlot::SetupAxis(ImAxis_X1, axisX.c_str());
+        ImPlot::SetupAxis(ImAxis_Y1, axisY.c_str());
+
         ImPlot::PlotBars(("##" + label).c_str(), y.data(), x.data(), y.size(), binWidth, spec);
 
         if (measure && ImPlot::IsPlotHovered()) {
@@ -196,6 +218,9 @@ void Plot::save(const std::string& path) {
     std::string titleStr = label;
     graph->SetTitle(titleStr.c_str());
 
+    graph->GetXaxis()->SetTitle(axisX.c_str());
+    graph->GetYaxis()->SetTitle(axisY.c_str());
+
     graph->SetLineColor(kBlue + 2);
     graph->SetLineWidth(2);
 
@@ -227,6 +252,9 @@ void Histogram::save(const std::string& path) {
 
     std::string titleStr = label;
     TH1F* hist = new TH1F("h_root", titleStr.c_str(), nBins, lowEdge, highEdge);
+
+    hist->GetXaxis()->SetTitle(axisX.c_str());
+    hist->GetYaxis()->SetTitle(axisY.c_str());
 
     for (int i = 0; i < nBins; ++i) {
         hist->SetBinContent(i + 1, x[i]);
