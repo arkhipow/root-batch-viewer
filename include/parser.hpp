@@ -10,6 +10,9 @@ struct Data {
     std::vector<float> x;
     std::vector<float> y;
 
+    std::string axisX;
+    std::string axisY;
+
     int bins;
 };
 

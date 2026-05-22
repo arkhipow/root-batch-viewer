@@ -70,6 +70,9 @@ void Parser::parse(File& file) {
                 data.cname = className;
                 data.name = graph->GetName();
 
+                data.axisX = graph->GetXaxis()->GetTitle();
+                data.axisY = graph->GetYaxis()->GetTitle();
+
                 double* xPoints = graph->GetX();
                 double* yPoints = graph->GetY();
 
@@ -90,6 +93,9 @@ void Parser::parse(File& file) {
 
                 data.cname = className;
                 data.name = histogram->GetName();
+
+                data.axisX = histogram->GetXaxis()->GetTitle();
+                data.axisY = histogram->GetYaxis()->GetTitle();
 
                 for (int i = 1; i <= histogram->GetNbinsX(); ++i) {
                     data.x.push_back(histogram->GetBinContent(i));
