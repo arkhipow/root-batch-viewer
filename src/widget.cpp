@@ -19,6 +19,14 @@ void Widget::setVisible(bool visible) noexcept {
     this->visible = visible;
 }
 
+std::string Widget::getLable() const {
+    return label;
+}
+
+void Widget::setLable(const std::string& label) {
+    this->label = label;
+}
+
 Rect Widget::getRectPixels() const {
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 

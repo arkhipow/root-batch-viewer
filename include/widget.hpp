@@ -21,6 +21,9 @@ public:
     bool getVisible() const noexcept;
     void setVisible(bool visible) noexcept;
 
+    std::string getLable() const;
+    void setLable(const std::string& label);
+
 protected:
     Rect getRectPixels() const;
     float getScale() const;
