@@ -58,6 +58,8 @@ public:
 
     void render() override;
 
+    std::vector<float> getX() const;
+    std::vector<float> getY() const;
     void setData(const std::vector<float>& x, const std::vector<float>& y);
 
     void setBins(int bins) noexcept;

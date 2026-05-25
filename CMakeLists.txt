@@ -80,6 +80,21 @@ set(NATIVE_FILE_DIALOG_EXTENDED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/nativef
 
 add_subdirectory(${NATIVE_FILE_DIALOG_EXTENDED_DIR})
 
+# DQMAnalazer
+set(DQM_ANALAZER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/DQMAnalazer)
+
+add_library(dqmanalazer STATIC
+    ${DQM_ANALAZER_DIR}/src/analyzers/GenericAnalyzer.cpp
+    ${DQM_ANALAZER_DIR}/src/core/Engine.cpp
+    ${DQM_ANALAZER_DIR}/src/core/QualityFilter.cpp
+    ${DQM_ANALAZER_DIR}/src/io/ResultWriter.cpp
+    ${DQM_ANALAZER_DIR}/src/io/RunListParser.cpp
+)
+
+target_include_directories(dqmanalazer PUBLIC
+    ${DQM_ANALAZER_DIR}/include
+)
+
 # Root Batch Viewer
 set(ROOT_BATCH_VIEWER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -108,4 +123,5 @@ target_link_libraries(root_batch_viewer PRIVATE
     imgui
     implot
     nfd
+    dqmanalazer
 )

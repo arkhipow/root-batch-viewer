@@ -4,50 +4,29 @@
 #include "button.hpp"
 #include "plot.hpp"
 #include "browser.hpp"
-
-#include <iostream>
+#include "process.hpp"
 
 int main() {
     Application app(Rect::percent(0, 0, 90, 80), "Root Batch Viewer");
-
-    std::vector<float> x;
-    std::vector<float> y;
-    for (float i = 0; i <= 100; i += 1) {
-        x.push_back(i);
-        y.push_back(i);
-    }
 
     std::vector<std::shared_ptr<Plot>> p;
     for (int i = 0; i < 20; ++i) {
         p.push_back(app.add<Plot>(Rect::percent(1, 6, 98, 88), "Plot " + std::to_string(i + 1)));
         p[i]->setTab(2);
         p[i]->setVisible(false);
-        p[i]->setData(x, y);
+        // p[i]->setData(x, y);
     }
     int curr = 0;
     p[curr]->setVisible(true);
 
     std::vector<float> hx;
-    float mean = 10.0f;
-    float sigma = 3.0f;
-
-    for (int i = 0; i < 100; ++i) {
-        float exponent = -std::pow(i - mean, 2) / (2 * std::pow(sigma, 2));
-        float weight = std::exp(exponent);
-
-        int count = static_cast<int>(weight * 100);
-
-        for (int j = 0; j < count; ++j) {
-            hx.push_back((float)i);
-        }
-    }
 
     std::vector<std::shared_ptr<Histogram>> h;
     for (int i = 0; i < 20; ++i) {
         h.push_back(app.add<Histogram>(Rect::percent(1, 6, 98, 88), "Histogram " + std::to_string(i + 1)));
         h[i]->setTab(2);
         h[i]->setVisible(false);
-        h[i]->setData(hx, x);
+        // h[i]->setData(hx, x);
         h[i]->setBins(-3);
     }
     int currH = 0;
@@ -89,15 +68,17 @@ int main() {
         }
     );
 
-    auto tl = app.add<InputText>(Rect::percent(1, 1, 10, 4), "Title");
+    auto view_p = app.add<Container>(Rect::percent(1, 1, 20, 50), "View Panel");
+    view_p->setTab(3);
+    view_p->setColor(0.9, 0.9, 0.9, 1);
+
+    auto tl = view_p->add<InputText>(Rect::percent(1, 1, 98, 6), "Title");
     tl->setText(p[curr]->getLable());
 
-    auto ax = app.add<InputText>(Rect::percent(1, 6, 10, 4), "Axis X");
-    ax->setTab(3);
+    auto ax = view_p->add<InputText>(Rect::percent(1, 8, 98, 6), "Axis X");
     ax->setText(p[curr]->getAxisX());
 
-    auto ay = app.add<InputText>(Rect::percent(1, 11, 10, 4), "Axis Y");
-    ay->setTab(3);
+    auto ay = view_p->add<InputText>(Rect::percent(1, 15, 98, 6), "Axis Y");
     ay->setText(p[curr]->getAxisY());
 
     auto sync = [&] {
@@ -249,6 +230,159 @@ int main() {
     auto fs = c2->add<Browser>(Rect::percent(0, 0, 100, 100), "Files");
     // fs->setElementRect(Rect::percent(0, 0, 100, 4));
 
+// ===================================================================================================
+// Algorithms
+
+    DQMAlgoProcessor dqmProcessor;
+
+    auto dqm_panel = app.add<Container>(Rect::percent(1, 1, 20, 50), "DQM Process");
+    dqm_panel->setTab(1);
+    dqm_panel->setColor(0.9, 0.9, 0.9, 1);
+
+    auto dqm_type_input = dqm_panel->add<InputText>(Rect::percent(1, 1, 98, 6), "Algorithm Type");
+    dqm_type_input->setText("Histogram Max");
+
+    auto dqm_min_input = dqm_panel->add<InputText>(Rect::percent(1, 8, 98, 6), "Filter Min");
+    dqm_min_input->setText("-100.0");
+
+    auto dqm_max_input = dqm_panel->add<InputText>(Rect::percent(1, 15, 98, 6), "Filter Max");
+    dqm_max_input->setText("100.0");
+
+    auto run_one_b = dqm_panel->add<Button>(Rect::percent(1, 22, 98, 6), "Run One");
+    
+    static int uniq = 1;
+    run_one_b->setCallback(
+        [&] {
+            std::vector<float> currentBinsPos = h[currH]->getY();
+            std::vector<float> currentHeights = h[currH]->getX();
+            std::string currentHistName = h[currH]->getLable();
+
+            if (currentHeights.empty() || currentBinsPos.empty()) {
+                std::cout << "[DQM Error] Current histogram on the screen is empty!" << std::endl;
+                return;
+            }
+
+            float resX, resY;
+            double minV = std::stod(dqm_min_input->getText());
+            double maxV = std::stod(dqm_max_input->getText());
+
+            bool ret = dqmProcessor.processSingleHistogram(
+                dqm_type_input->getText(),
+                currentHistName, 
+                currentBinsPos,
+                currentHeights,
+                minV,
+                maxV,
+                resX,
+                resY
+            );
+
+            if (ret) {
+
+                h[currH]->setVisible(false);
+                p[curr]->setVisible(true);
+
+                std::vector<float> plotX = { resX }; 
+                std::vector<float> plotY = { resY }; 
+                p[curr]->setData(plotX, plotY);
+                
+                p[curr]->setLable("Algorithm: " + dqm_type_input->getText()  + " | "
+                                                + "Name: " + currentHistName + " | " + std::to_string(uniq)
+                );
+                p[curr]->setAxisX("Current Run");
+                p[curr]->setAxisY(dqm_type_input->getText());
+                p[curr]->reset();
+
+                ps->setToggle(true);
+                hs->setToggle(false);
+                b1->setVisible(true);
+                b2->setVisible(true);
+
+                uniq++;
+                
+                sync();
+
+                std::cout << "[DQM Success] Calculation is performed for the histogram: " << currentHistName << " | Result = " << resY << std::endl;
+            }
+        }
+    );
+
+    auto run_all_b = dqm_panel->add<Button>(Rect::percent(1, 29, 98, 6), "Run All");
+    run_all_b->setCallback(
+        [&] {
+            std::vector<float> plotX;
+            std::vector<float> plotY;
+
+            std::string algoName = dqm_type_input->getText();
+            double minV = std::stod(dqm_min_input->getText());
+            double maxV = std::stod(dqm_max_input->getText());
+
+            int stepCounter = 1;
+            
+            for (size_t i = 0; i < h.size(); ++i) {
+                if (!h[i]) continue;
+
+                std::vector<float> currentBinsPos = h[i]->getY();
+                std::vector<float> currentHeights = h[i]->getX();
+                std::string currentHistName = h[i]->getLable();
+
+                if (currentHeights.empty() || currentBinsPos.empty()) {
+                    continue;
+                }
+
+                float resX, resY;
+
+                bool ret = dqmProcessor.processSingleHistogram(
+                    algoName,
+                    currentHistName, 
+                    currentBinsPos,
+                    currentHeights,
+                    minV,
+                    maxV,
+                    resX,
+                    resY
+                );
+
+                if (ret) {
+                    plotX.push_back(static_cast<float>(stepCounter));
+                    plotY.push_back(resY);
+                    stepCounter++;
+                }
+            }
+
+            if (!plotY.empty()) {
+                if (currH >= 0 && currH < static_cast<int>(h.size()) && h[currH]) {
+                    h[currH]->setVisible(false);
+                }
+                
+                if (curr < 0 || curr >= static_cast<int>(p.size()) || !p[curr]) {
+                    std::cout << "[DQM Error] Invalid index!" << std::endl;
+                    return;
+                }
+                p[curr]->setVisible(true);
+
+                p[curr]->setData(plotX, plotY);
+                
+                p[curr]->setLable("Batch " + algoName + " | Total Points: " + std::to_string(plotY.size()) + " | #" + std::to_string(uniq));
+                p[curr]->setAxisX("Histogram Index");
+                p[curr]->setAxisY(algoName);
+                
+                p[curr]->reset();
+
+                ps->setToggle(true);
+                hs->setToggle(false);
+                b1->setVisible(true);
+                b2->setVisible(true);
+
+                uniq++;
+                
+                sync();
+            }
+        }
+    );
+
+// ===================================================================================================
+
     auto b6 = c1->add<Button>(Rect::percent(0, 96, 100, 4), "Open File");
     b6->setCallback(
         [&fs] {
@@ -366,8 +500,6 @@ int main() {
             std::string path = File::save();
             if (path.empty()) return;
 
-            std::cout << path << std::endl;
-
             if (ps->getToggle()) {
                 p[curr]->save(path);
             }
@@ -379,39 +511,19 @@ int main() {
     );
 
     // View
-    tl->setTab(3);
-    tl->setCallback(
+    auto apply_view = view_p->add<Button>(Rect::percent(1, 22, 98, 6), "Apply");
+    apply_view->setCallback(
         [&] {
             if (ps->getToggle()) {
-                p[curr]->setLable(tl->getText());
+                p[curr]->setLable(tl->getText().empty() ? " " : tl->getText());
+                p[curr]->setAxisX(ax->getText().empty() ? " " : ax->getText());
+                p[curr]->setAxisY(ay->getText().empty() ? " " : ay->getText());
             }
 
             else if (hs->getToggle()) {
-                h[currH]->setLable(tl->getText());
-            }
-        }
-    );
-
-    ax->setCallback(
-        [&] {
-            if (ps->getToggle()) {
-                p[curr]->setAxisX(ax->getText());
-            }
-
-            else if (hs->getToggle()) {
-                h[currH]->setAxisX(ax->getText());
-            }
-        }
-    );
-
-    ay->setCallback(
-        [&] {
-            if (ps->getToggle()) {
-                p[curr]->setAxisY(ay->getText());
-            }
-
-            else if (hs->getToggle()) {
-                h[currH]->setAxisY(ay->getText());
+                h[currH]->setLable(tl->getText().empty() ? " " : tl->getText());
+                h[currH]->setAxisX(ax->getText().empty() ? " " : ax->getText());
+                h[currH]->setAxisY(ay->getText().empty() ? " " : ay->getText());
             }
         }
     );

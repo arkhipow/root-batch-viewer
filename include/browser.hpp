@@ -19,6 +19,8 @@ public:
     Data& getData();
     bool getSelect();
 
+    std::vector<File>& getFiles();
+
 private:
     std::vector<File> files;
     int currFile;

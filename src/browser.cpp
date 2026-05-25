@@ -65,6 +65,10 @@ Data& Browser::getData() {
     return files[currFile].getData()[currData];
 }
 
+std::vector<File>& Browser::getFiles() {
+    return files;
+}
+
 bool Browser::getSelect() {
     if (currFile < 0 || currFile >= static_cast<int>(files.size())) return false;
     if (currData < 0 || currData >= static_cast<int>(files[currFile].getData().size())) return false;

@@ -180,6 +180,14 @@ void Histogram::render() {
     }
 }
 
+std::vector<float> Histogram::getX() const {
+    return x;
+}
+
+std::vector<float> Histogram::getY() const {
+    return y;
+}
+
 void Histogram::setData(const std::vector<float>& x, const std::vector<float>& y) {
     this->x = x;
     this->y = y;
